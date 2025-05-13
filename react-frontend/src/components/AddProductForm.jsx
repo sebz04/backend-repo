@@ -17,6 +17,8 @@ const PreviewImage = styled.img`
   border: 1px solid #eee;
 `;
 
+const backendURL = "https://backend-repo-xfxe.onrender.com";
+
 function AddProductForm({ onProductAdded }) {
   const [imagePreview, setImagePreview] = useState("");
   const [apiError, setApiError] = useState(null);
@@ -31,11 +33,23 @@ function AddProductForm({ onProductAdded }) {
 
   const onSubmit = async (data) => {
     try {
-      await axios.post("https://backend-repo-xfxe.onrender.com/api/products", data);
-      onProductAdded(); // refresh product list
-      reset(); // clear form
-      setImagePreview("");
-      setApiError(null);
+      const imagePath = data.imageURL.startsWith("http")
+        ? data.imageURL
+        : `${backendURL}/images/${data.imageURL}`;
+
+      const response = await axios.post(`${backendURL}/api/products`, {
+        name: data.name,
+        price: parseFloat(data.price),
+        description: data.description,
+        imageURL: imagePath,
+      });
+
+      if (response.status === 201) {
+        reset(); // clear form
+        setImagePreview("");
+        setApiError(null);
+        onProductAdded(); // refresh product list
+      }
     } catch (err) {
       console.error(err);
       setApiError("Failed to add product. Please try again.");
@@ -43,8 +57,11 @@ function AddProductForm({ onProductAdded }) {
   };
 
   const handleBlur = () => {
-    const url = watch("imageURL");
-    setImagePreview(url);
+    const raw = watch("imageURL");
+    const previewURL = raw.startsWith("http")
+      ? raw
+      : `${backendURL}/images/${raw}`;
+    setImagePreview(previewURL);
   };
 
   return (
@@ -92,10 +109,6 @@ function AddProductForm({ onProductAdded }) {
           <input
             {...register("imageURL", {
               required: "Image URL is required",
-              pattern: {
-                value: /^https?:\/\/.+\.(jpg|jpeg|png|gif)$/,
-                message: "Enter a valid image URL",
-              },
             })}
             onBlur={handleBlur}
           />
