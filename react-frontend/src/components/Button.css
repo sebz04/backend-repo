@@ -1,0 +1,30 @@
+.button-3d {
+  background-color: #1717ca; /* Blue */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  box-shadow: 0 9px #999;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+}
+
+.button-3d:hover {
+  background-color: #45a049;
+}
+
+.button-3d:active {
+  background-color: #1717ca;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+
+.button-3d:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
