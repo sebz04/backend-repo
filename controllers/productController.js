@@ -10,8 +10,8 @@ exports.getAllProducts = async (req, res) => {
         p.price,
         p.description,
         CASE 
-          WHEN i.imageURL IS NOT NULL THEN i.imageURL
-          ELSE '/images/no-image.jpg'
+          WHEN i.imageURL IS NOT NULL THEN CONCAT('https://backend-repo-xfxe.onrender.com', i.imageURL)
+          ELSE 'https://backend-repo-xfxe.onrender.com/images/no-image.jpg'
         END AS imageURL
       FROM Products p
       LEFT JOIN ImageMaster i ON p.imageID = i.imageID

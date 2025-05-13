@@ -14,5 +14,5 @@ app.use(express.json());
 app.use("/api/products", productRoutes); // ⬅️ All product APIs under this path
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running`);
 });
