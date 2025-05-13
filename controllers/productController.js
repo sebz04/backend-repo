@@ -1,11 +1,20 @@
-// controllers/productController.js
 const db = require("../db");
 
+// 🔹 GET all products with image URL from ImageMaster
 exports.getAllProducts = async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT product_id AS id, prod_name AS name, price, description, imageURL
-      FROM Products
+      SELECT 
+        p.product_id AS id,
+        p.prod_name AS name,
+        p.price,
+        p.description,
+        CASE 
+          WHEN i.imageURL IS NOT NULL THEN i.imageURL
+          ELSE '/images/no-image.jpg'
+        END AS imageURL
+      FROM Products p
+      LEFT JOIN ImageMaster i ON p.imageID = i.imageID
     `);
     res.json(rows);
   } catch (err) {
@@ -13,17 +22,18 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+// 🔹 CREATE a new product
 exports.createProduct = async (req, res) => {
-  const { name, price, description, imageURL } = req.body;
-  if (!name || !price || !description || !imageURL) {
-    return res.status(400).json({ error: "All fields are required" });
+  const { name, price, description, imageID } = req.body;
+  if (!name || !price || !description) {
+    return res.status(400).json({ error: "Name, price, and description are required" });
   }
 
   try {
-    const [result] = await db.query(`
-      INSERT INTO Products (prod_name, price, description, imageURL)
-      VALUES (?, ?, ?, ?)`,
-      [name, price, description, imageURL]
+    const [result] = await db.query(
+      `INSERT INTO Products (prod_name, price, description, imageID)
+       VALUES (?, ?, ?, ?)`,
+      [name, price, description, imageID || null]
     );
     res.status(201).json({ message: "Product added", id: result.insertId });
   } catch (err) {
@@ -31,19 +41,21 @@ exports.createProduct = async (req, res) => {
   }
 };
 
+// 🔹 UPDATE an existing product
 exports.updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, price, description, imageURL } = req.body;
-  if (!name || !price || !description || !imageURL) {
-    return res.status(400).json({ error: "All fields are required" });
+  const { name, price, description, imageID } = req.body;
+
+  if (!name || !price || !description) {
+    return res.status(400).json({ error: "Name, price, and description are required" });
   }
 
   try {
-    const [result] = await db.query(`
-      UPDATE Products
-      SET prod_name = ?, price = ?, description = ?, imageURL = ?
-      WHERE product_id = ?`,
-      [name, price, description, imageURL, id]
+    const [result] = await db.query(
+      `UPDATE Products
+       SET prod_name = ?, price = ?, description = ?, imageID = ?
+       WHERE product_id = ?`,
+      [name, price, description, imageID || null, id]
     );
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Product not found" });
@@ -54,6 +66,7 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
+// 🔹 DELETE a product
 exports.deleteProduct = async (req, res) => {
   const { id } = req.params;
 
