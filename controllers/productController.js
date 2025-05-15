@@ -25,6 +25,7 @@ exports.getAllProducts = async (req, res) => {
 // 🔹 CREATE a new product
 exports.createProduct = async (req, res) => {
   const { name, price, description, imageID } = req.body;
+
   if (!name || !price || !description) {
     return res.status(400).json({ error: "Name, price, and description are required" });
   }
@@ -55,7 +56,7 @@ exports.updateProduct = async (req, res) => {
       `UPDATE Products
        SET prod_name = ?, price = ?, description = ?, imageID = ?
        WHERE product_id = ?`,
-      [name, price, description, imageID || null, id]
+      [name, price, description, imageID || null, parseInt(id)]
     );
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Product not found" });
@@ -69,17 +70,20 @@ exports.updateProduct = async (req, res) => {
 // 🔹 DELETE a product
 exports.deleteProduct = async (req, res) => {
   const { id } = req.params;
+  console.log("🔍 Deleting product with ID:", id);
 
   try {
     const [result] = await db.query(
       "DELETE FROM Products WHERE product_id = ?",
-      [id]
+      [parseInt(id)]
     );
     if (result.affectedRows === 0) {
+      console.warn("❌ No product found with ID:", id);
       return res.status(404).json({ error: "Product not found" });
     }
     res.json({ message: "Product deleted" });
   } catch (err) {
+    console.error("🔥 Delete failed:", err.message);
     res.status(500).json({ error: "Failed to delete product", details: err.message });
   }
 };
