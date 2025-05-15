@@ -8,10 +8,10 @@ import ProductList from "./components/ProductList";
 
 function App() {
   const [view, setView] = useState("add"); // "add" or "edit"
-  const [products, setProducts] = useState([]);      // product list from backend
-  const [selectedProduct, setSelectedProduct] = useState(null); // product being edited
+  const [products, setProducts] = useState([]); // product list
+  const [selectedProduct, setSelectedProduct] = useState(null); // product to edit
 
-  // Fetch products from backend
+  // Fetch product list from backend
   const fetchProducts = async () => {
     try {
       const response = await axios.get("https://backend-repo-xfxe.onrender.com/api/products");
@@ -25,7 +25,7 @@ function App() {
     fetchProducts();
   }, []);
 
-  // Handle delete product
+  // Delete handler
   const handleDelete = async (id) => {
     try {
       await axios.delete(`https://backend-repo-xfxe.onrender.com/api/products/${id}`);
@@ -35,7 +35,7 @@ function App() {
     }
   };
 
-  // Handle click on edit icon
+  // Edit icon click
   const handleEditClick = (product) => {
     setSelectedProduct(product);
     setView("edit");
@@ -47,7 +47,10 @@ function App() {
       <HelloCard />
       <SampleForm />
 
-      {view === "add" && <AddProductForm onProductAdded={fetchProducts} />}
+      {view === "add" && (
+        <AddProductForm onProductAdded={fetchProducts} />
+      )}
+
       {view === "edit" && selectedProduct && (
         <EditProductForm
           product={selectedProduct}
