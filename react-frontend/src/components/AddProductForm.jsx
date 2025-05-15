@@ -110,7 +110,14 @@ function AddProductForm({ onProductAdded }) {
             {...register("imageURL", {
               required: "Image URL is required",
             })}
-            onBlur={handleBlur}
+            onBlur={() => {
+              const raw = watch("imageURL");
+              const previewURL = raw.startsWith("http")
+                ? raw
+                : `${backendURL}/images/${raw}`;
+              setImagePreview(previewURL);
+            }}
+
           />
           {errors.imageURL && (
             <p style={{ color: "red" }}>{errors.imageURL.message}</p>
