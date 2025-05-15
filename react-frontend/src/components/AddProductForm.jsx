@@ -19,6 +19,14 @@ const PreviewImage = styled.img`
 
 const backendURL = "https://backend-repo-xfxe.onrender.com";
 
+const handleBlur = () => {
+  const raw = watch("imageURL");
+  const previewURL = raw.startsWith("http")
+    ? raw
+    : `${backendURL}/images/${raw}`;
+  setImagePreview(previewURL);
+};
+
 function AddProductForm({ onProductAdded }) {
   const [imagePreview, setImagePreview] = useState("");
   const [apiError, setApiError] = useState(null);
