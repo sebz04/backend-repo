@@ -29,13 +29,16 @@ const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
   }, [product]);
 
   const onSubmit = async (data) => {
-    try {
-      await axios.put(`https://backend-repo-xfxe.onrender.com/api/products/${product.id}`, data);
-      onProductUpdated();
-    } catch (err) {
-      console.error("Update failed:", err.message);
-    }
-  };
+  try {
+    await axios.put(
+      `https://backend-repo-xfxe.onrender.com/api/products/${product.id}`,
+      data
+    );
+    await onProductUpdated(); // ✅ await to ensure updated product appears in refreshed list
+  } catch (err) {
+    console.error("Update failed:", err.message);
+  }
+};
 
   return (
     <FormContainer>

@@ -32,37 +32,29 @@ function AddProductForm({ onProductAdded }) {
   } = useForm();
 
   const onSubmit = async (data) => {
-    try {
-      const imagePath = data.imageURL.startsWith("http")
-        ? data.imageURL
-        : `${backendURL}/images/${data.imageURL}`;
+  try {
+    const imagePath = data.imageURL.startsWith("http")
+      ? data.imageURL
+      : `${backendURL}/images/${data.imageURL}`;
 
-      const response = await axios.post(`${backendURL}/api/products`, {
-        name: data.name,
-        price: parseFloat(data.price),
-        description: data.description,
-        imageURL: imagePath,
-      });
+    const response = await axios.post(`${backendURL}/api/products`, {
+      name: data.name,
+      price: parseFloat(data.price),
+      description: data.description,
+      imageURL: imagePath,
+    });
 
-      if (response.status === 201) {
-        reset(); // clear form
-        setImagePreview("");
-        setApiError(null);
-        onProductAdded(); // refresh product list
-      }
-    } catch (err) {
-      console.error(err);
-      setApiError("Failed to add product. Please try again.");
+    if (response.status === 201) {
+      await onProductAdded(); // ✅ await to ensure list updates
+      reset(); // clear form
+      setImagePreview("");
+      setApiError(null);
     }
-  };
-
-  const handleBlur = () => {
-    const raw = watch("imageURL");
-    const previewURL = raw.startsWith("http")
-      ? raw
-      : `${backendURL}/images/${raw}`;
-    setImagePreview(previewURL);
-  };
+  } catch (err) {
+    console.error(err);
+    setApiError("Failed to add product. Please try again.");
+  }
+};
 
   return (
     <FormContainer>
