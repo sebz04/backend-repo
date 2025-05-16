@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+// ProductList.jsx
+import React from 'react';
 import styled from 'styled-components';
 import { FaEdit, FaTimes } from 'react-icons/fa';
 
-// Styled-components
 const ProductListContainer = styled.div`
   margin: 20px;
 `;
@@ -35,56 +34,31 @@ const IconButton = styled.button`
   margin-right: 8px;
 `;
 
-const ProductList = ({ onEditClick, onDeleteClick }) => {
-  const [products, setProducts] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get('https://backend-repo-xfxe.onrender.com/api/products');
-        setProducts(response.data);
-      } catch (err) {
-        setError('Failed to fetch products. Please try again later.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
-  if (loading) return <p>Loading products...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+const ProductList = ({ products, onEditClick, onDeleteClick }) => {
+  if (!products || products.length === 0) return <p>No products available.</p>;
 
   return (
     <ProductListContainer>
       <h2>Product List</h2>
-      {products.length === 0 ? (
-        <p>No products available.</p>
-      ) : (
-        <ul style={{ padding: 0 }}>
-          {products.map(product => (
-            <ProductItem key={product.id}>
-              {product.imageURL && (
-                <ProductImage src={product.imageURL} alt={product.name} />
-              )}
-              <ProductInfo>
-                <strong>{product.name}</strong> - ${product.price}<br />
-                <em>{product.description}</em><br />
-                <IconButton onClick={() => onEditClick(product)} title="Edit">
-                  <FaEdit />
-                </IconButton>
-                <IconButton onClick={() => onDeleteClick(product.id)} title="Delete">
-                  <FaTimes />
-                </IconButton>
-              </ProductInfo>
-            </ProductItem>
-          ))}
-        </ul>
-      )}
+      <ul style={{ padding: 0 }}>
+        {products.map((product) => (
+          <ProductItem key={product.id}>
+            {product.imageURL && (
+              <ProductImage src={product.imageURL} alt={product.name} />
+            )}
+            <ProductInfo>
+              <strong>{product.name}</strong> - ${product.price}<br />
+              <em>{product.description}</em><br />
+              <IconButton onClick={() => onEditClick(product)} title="Edit">
+                <FaEdit />
+              </IconButton>
+              <IconButton onClick={() => onDeleteClick(product.id)} title="Delete">
+                <FaTimes />
+              </IconButton>
+            </ProductInfo>
+          </ProductItem>
+        ))}
+      </ul>
     </ProductListContainer>
   );
 };
