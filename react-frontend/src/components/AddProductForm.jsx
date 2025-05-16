@@ -32,7 +32,6 @@ function AddProductForm({ onProductAdded }) {
     watch,
   } = useForm();
 
-  // 🔹 Fetch available image options
   useEffect(() => {
     const fetchImages = async () => {
       try {
@@ -51,7 +50,7 @@ function AddProductForm({ onProductAdded }) {
         name: data.name,
         price: parseFloat(data.price),
         description: data.description,
-        imageID: parseInt(data.imageID), // ✅ Send imageID only
+        imageID: parseInt(data.imageID),
       });
 
       if (response.status === 201) {
