@@ -1,6 +1,7 @@
 const db = require("../db");
 
-// 🔹 GET all products with image URL from ImageMaster
+// Fetch all products and imageURL from SQL query
+// If no image is found, it uses a default "no-image" like in Project 1
 exports.getAllProducts = async (req, res) => {
   try {
     const [rows] = await db.query(`
@@ -22,7 +23,8 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// 🔹 CREATE a new product
+// Add a new product to the database with requirmenets
+// Inserts the product into the Products table and returns the new product ID.
 exports.createProduct = async (req, res) => {
   const { name, price, description, imageID } = req.body;
 
@@ -42,7 +44,7 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// 🔹 UPDATE an existing product
+// Update an existing product by ID
 exports.updateProduct = async (req, res) => {
   const { id } = req.params;
   const { name, price, description, imageID } = req.body;
@@ -67,7 +69,7 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-// 🔹 DELETE a product
+// Delete a product by ID
 exports.deleteProduct = async (req, res) => {
   const { id } = req.params;
   console.log("🔍 Deleting product with ID:", id);
@@ -88,7 +90,8 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
-// 🔹 GET image list from ImageMaster
+// Returns all images from the ImageMaster table (imageID and imageURL)
+// Requires a valid API key in the query string to authorize access
 exports.getImageList = async (req, res) => {
   const apiKey = req.query.api_key;
   const validKey = "66529166-2cfe-473a-a538-b18bccf32cb7";

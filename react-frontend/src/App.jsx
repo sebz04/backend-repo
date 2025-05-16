@@ -7,11 +7,16 @@ import EditProductForm from "./components/EditProductForm";
 import ProductList from "./components/ProductList";
 
 function App() {
-  const [view, setView] = useState("add"); // "add" or "edit"
-  const [products, setProducts] = useState([]); // product list
-  const [selectedProduct, setSelectedProduct] = useState(null); // product to edit
+  // State for view mode: either "add" or "edit"
+  const [view, setView] = useState("add");
 
-  // Fetch product list from backend
+  // State to hold the list of products from the backend
+  const [products, setProducts] = useState([]);
+
+  // State to track which product is selected for editing
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Fetch product data from backend and update UI
   const fetchProducts = async () => {
     try {
       const response = await axios.get("https://backend-repo-xfxe.onrender.com/api/products");
@@ -21,21 +26,22 @@ function App() {
     }
   };
 
+  // Fetch products when app loads
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Delete handler
+  // Handle delete action and refresh product list
   const handleDelete = async (id) => {
     try {
       await axios.delete(`https://backend-repo-xfxe.onrender.com/api/products/${id}`);
-      fetchProducts();
+      fetchProducts(); // refresh list after deletion
     } catch (err) {
       console.error("Delete failed:", err.message);
     }
   };
 
-  // Edit icon click
+  // Set the selected product and switch to edit view
   const handleEditClick = (product) => {
     setSelectedProduct(product);
     setView("edit");
@@ -44,24 +50,28 @@ function App() {
   return (
     <>
       <h1>React Frontend Setup Complete</h1>
+
       <HelloCard />
       <SampleForm />
 
+      {/* Show AddProductForm if in 'add' mode */}
       {view === "add" && (
         <AddProductForm onProductAdded={fetchProducts} />
       )}
 
+      {/* Show EditProductForm if editing a product */}
       {view === "edit" && selectedProduct && (
         <EditProductForm
           product={selectedProduct}
           onCancel={() => setView("add")}
           onProductUpdated={() => {
-            fetchProducts();
+            fetchProducts(); // refresh product list after edit
             setView("add");
           }}
         />
       )}
 
+      {/* Display list of products with edit/delete handlers */}
       <ProductList
         products={products}
         onEditClick={handleEditClick}

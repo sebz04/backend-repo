@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import styled from "styled-components";
 
+// Styled container for form layout
 const FormContainer = styled.div`
   margin: 20px;
   padding: 16px;
@@ -10,6 +11,7 @@ const FormContainer = styled.div`
   border-radius: 12px;
 `;
 
+// Preview image styling
 const PreviewImage = styled.img`
   max-width: 150px;
   height: auto;
@@ -17,13 +19,16 @@ const PreviewImage = styled.img`
   border: 1px solid #eee;
 `;
 
+// base URL
 const backendURL = "https://backend-repo-xfxe.onrender.com";
 
+// To add a new product
 function AddProductForm({ onProductAdded }) {
-  const [imagePreview, setImagePreview] = useState("");
-  const [apiError, setApiError] = useState(null);
-  const [images, setImages] = useState([]);
+  const [imagePreview, setImagePreview] = useState(""); // URL of selected image to preview
+  const [apiError, setApiError] = useState(null);        // error state for submission
+  const [images, setImages] = useState([]);              // list of images to populate dropdown
 
+  // React Hook Form setup
   const {
     register,
     handleSubmit,
@@ -32,10 +37,13 @@ function AddProductForm({ onProductAdded }) {
     watch,
   } = useForm();
 
+  // Fetch image options from backend on component mount
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await axios.get(`${backendURL}/api/products/images?api_key=66529166-2cfe-473a-a538-b18bccf32cb7`);
+        const response = await axios.get(
+          `${backendURL}/api/products/images?api_key=66529166-2cfe-473a-a538-b18bccf32cb7`
+        );
         setImages(response.data);
       } catch (err) {
         console.error("Failed to fetch images", err.message);
@@ -44,20 +52,21 @@ function AddProductForm({ onProductAdded }) {
     fetchImages();
   }, []);
 
+  // Handle form submission to add a new product
   const onSubmit = async (data) => {
     try {
       const response = await axios.post(`${backendURL}/api/products`, {
         name: data.name,
         price: parseFloat(data.price),
         description: data.description,
-        imageID: parseInt(data.imageID),
+        imageID: parseInt(data.imageID), // reference to image in ImageMaster
       });
 
       if (response.status === 201) {
-        await onProductAdded();
-        reset();
-        setImagePreview("");
-        setApiError(null);
+        await onProductAdded();    // refresh product list
+        reset();                   // reset form
+        setImagePreview("");       // clear preview
+        setApiError(null);         // clear errors
       }
     } catch (err) {
       console.error(err);
@@ -65,6 +74,7 @@ function AddProductForm({ onProductAdded }) {
     }
   };
 
+  // Update preview when user selects a different image
   const handleImageChange = (e) => {
     const selectedId = e.target.value;
     const selectedImage = images.find((img) => img.imageID === parseInt(selectedId));

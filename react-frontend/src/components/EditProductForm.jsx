@@ -4,6 +4,7 @@ import axios from "axios";
 import styled from "styled-components";
 import MyButton from "./MyButton";
 
+// CSS styling
 const FormContainer = styled.div`
   padding: 20px;
   border: 1px solid #ccc;
@@ -18,8 +19,10 @@ const PreviewImage = styled.img`
   border: 1px solid #eee;
 `;
 
+// base URL
 const backendURL = "https://backend-repo-xfxe.onrender.com";
 
+// Allows editing existing product details
 const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
   const {
     register,
@@ -29,14 +32,16 @@ const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
     watch,
   } = useForm();
 
-  const [images, setImages] = useState([]);
-  const [imagePreview, setImagePreview] = useState("");
+  const [images, setImages] = useState([]);          // List of image options from backend
+  const [imagePreview, setImagePreview] = useState(""); // Selected image preview URL
 
-  // 🔹 Fetch available images for dropdown
+  // Fetch available image options from backend once on mount
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await axios.get(`${backendURL}/api/products/images?api_key=66529166-2cfe-473a-a538-b18bccf32cb7`);
+        const response = await axios.get(
+          `${backendURL}/api/products/images?api_key=66529166-2cfe-473a-a538-b18bccf32cb7`
+        );
         setImages(response.data);
       } catch (err) {
         console.error("Failed to fetch images", err.message);
@@ -45,14 +50,18 @@ const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
     fetchImages();
   }, []);
 
-  // 🔹 Prefill form once product AND images are loaded
+  // Prefill form fields with selected product details once product + images are loaded
   useEffect(() => {
     if (product && images.length > 0) {
       setValue("name", product.name);
       setValue("price", product.price);
       setValue("description", product.description);
 
-      const matchedImage = images.find((img) => `${backendURL}${img.imageURL}` === product.imageURL);
+      // Match imageURL to find correct imageID
+      const matchedImage = images.find(
+        (img) => `${backendURL}${img.imageURL}` === product.imageURL
+      );
+
       if (matchedImage) {
         setValue("imageID", matchedImage.imageID);
         setImagePreview(`${backendURL}${matchedImage.imageURL}`);
@@ -60,6 +69,7 @@ const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
     }
   }, [product, images, setValue]);
 
+  // Submit updated product info to backend
   const onSubmit = async (data) => {
     try {
       const payload = {
@@ -70,14 +80,17 @@ const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
       };
 
       await axios.put(`${backendURL}/api/products/${product.id}`, payload);
-      await onProductUpdated(); // ✅ refresh product list
+      await onProductUpdated(); // Refresh product list in parent
     } catch (err) {
       console.error("Update failed:", err.message);
     }
   };
 
+  // Update preview image when user selects a new image from dropdown
   const handleImageChange = (e) => {
-    const selected = images.find(img => img.imageID === parseInt(e.target.value));
+    const selected = images.find(
+      (img) => img.imageID === parseInt(e.target.value)
+    );
     if (selected) {
       setImagePreview(`${backendURL}${selected.imageURL}`);
     }
@@ -116,7 +129,10 @@ const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
 
         <div>
           <label>Select Image:</label>
-          <select {...register("imageID", { required: "Image is required" })} onChange={handleImageChange}>
+          <select
+            {...register("imageID", { required: "Image is required" })}
+            onChange={handleImageChange}
+          >
             <option value="">-- Choose an image --</option>
             {images.map((img) => (
               <option key={img.imageID} value={img.imageID}>
@@ -128,8 +144,16 @@ const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
           {imagePreview && <PreviewImage src={imagePreview} alt="Preview" />}
         </div>
 
-        <MyButton label="Save" onClickHandler={handleSubmit(onSubmit)} isChanged={true} />
-        <MyButton label="Cancel" onClickHandler={onCancel} isChanged={true} />
+        <MyButton
+          label="Save"
+          onClickHandler={handleSubmit(onSubmit)}
+          isChanged={true}
+        />
+        <MyButton
+          label="Cancel"
+          onClickHandler={onCancel}
+          isChanged={true}
+        />
       </form>
     </FormContainer>
   );
