@@ -32,6 +32,7 @@ const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
   const [images, setImages] = useState([]);
   const [imagePreview, setImagePreview] = useState("");
 
+  // 🔹 Fetch available images for dropdown
   useEffect(() => {
     const fetchImages = async () => {
       try {
@@ -44,18 +45,20 @@ const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
     fetchImages();
   }, []);
 
+  // 🔹 Prefill form once product AND images are loaded
   useEffect(() => {
-    if (product) {
+    if (product && images.length > 0) {
       setValue("name", product.name);
       setValue("price", product.price);
       setValue("description", product.description);
-      const matching = images.find(img => `${backendURL}${img.imageURL}` === product.imageURL);
-      if (matching) {
-        setValue("imageID", matching.imageID);
-        setImagePreview(`${backendURL}${matching.imageURL}`);
+
+      const matchedImage = images.find((img) => `${backendURL}${img.imageURL}` === product.imageURL);
+      if (matchedImage) {
+        setValue("imageID", matchedImage.imageID);
+        setImagePreview(`${backendURL}${matchedImage.imageURL}`);
       }
     }
-  }, [product, setValue, images]);
+  }, [product, images, setValue]);
 
   const onSubmit = async (data) => {
     try {
@@ -67,7 +70,7 @@ const EditProductForm = ({ product, onCancel, onProductUpdated }) => {
       };
 
       await axios.put(`${backendURL}/api/products/${product.id}`, payload);
-      await onProductUpdated();
+      await onProductUpdated(); // ✅ refresh product list
     } catch (err) {
       console.error("Update failed:", err.message);
     }
