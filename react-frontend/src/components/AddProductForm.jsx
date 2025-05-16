@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import styled from "styled-components";
@@ -19,17 +19,10 @@ const PreviewImage = styled.img`
 
 const backendURL = "https://backend-repo-xfxe.onrender.com";
 
-const handleBlur = () => {
-  const raw = watch("imageURL");
-  const previewURL = raw.startsWith("http")
-    ? raw
-    : `${backendURL}/images/${raw}`;
-  setImagePreview(previewURL);
-};
-
 function AddProductForm({ onProductAdded }) {
   const [imagePreview, setImagePreview] = useState("");
   const [apiError, setApiError] = useState(null);
+  const [images, setImages] = useState([]);
 
   const {
     register,
@@ -39,30 +32,47 @@ function AddProductForm({ onProductAdded }) {
     watch,
   } = useForm();
 
+  // 🔹 Fetch available image options
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await axios.get(`${backendURL}/images?api_key=66529166-2cfe-473a-a538-b18bccf32cb7`);
+        setImages(response.data);
+      } catch (err) {
+        console.error("Failed to fetch images", err.message);
+      }
+    };
+    fetchImages();
+  }, []);
+
   const onSubmit = async (data) => {
-  try {
-    const imagePath = data.imageURL.startsWith("http")
-      ? data.imageURL
-      : `${backendURL}/images/${data.imageURL}`;
+    try {
+      const response = await axios.post(`${backendURL}/api/products`, {
+        name: data.name,
+        price: parseFloat(data.price),
+        description: data.description,
+        imageID: parseInt(data.imageID), // ✅ Send imageID only
+      });
 
-    const response = await axios.post(`${backendURL}/api/products`, {
-      name: data.name,
-      price: parseFloat(data.price),
-      description: data.description,
-      imageURL: imagePath,
-    });
-
-    if (response.status === 201) {
-      await onProductAdded(); // ✅ await to ensure list updates
-      reset(); // clear form
-      setImagePreview("");
-      setApiError(null);
+      if (response.status === 201) {
+        await onProductAdded();
+        reset();
+        setImagePreview("");
+        setApiError(null);
+      }
+    } catch (err) {
+      console.error(err);
+      setApiError("Failed to add product. Please try again.");
     }
-  } catch (err) {
-    console.error(err);
-    setApiError("Failed to add product. Please try again.");
-  }
-};
+  };
+
+  const handleImageChange = (e) => {
+    const selectedId = e.target.value;
+    const selectedImage = images.find((img) => img.imageID === parseInt(selectedId));
+    if (selectedImage) {
+      setImagePreview(`${backendURL}${selectedImage.imageURL}`);
+    }
+  };
 
   return (
     <FormContainer>
@@ -70,9 +80,7 @@ function AddProductForm({ onProductAdded }) {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label>Product Name:</label>
-          <input
-            {...register("name", { required: "Product name is required" })}
-          />
+          <input {...register("name", { required: "Product name is required" })} />
           {errors.name && <p style={{ color: "red" }}>{errors.name.message}</p>}
         </div>
 
@@ -87,9 +95,7 @@ function AddProductForm({ onProductAdded }) {
               },
             })}
           />
-          {errors.description && (
-            <p style={{ color: "red" }}>{errors.description.message}</p>
-          )}
+          {errors.description && <p style={{ color: "red" }}>{errors.description.message}</p>}
         </div>
 
         <div>
@@ -99,34 +105,24 @@ function AddProductForm({ onProductAdded }) {
             step="0.01"
             {...register("price", { required: "Price is required" })}
           />
-          {errors.price && (
-            <p style={{ color: "red" }}>{errors.price.message}</p>
-          )}
+          {errors.price && <p style={{ color: "red" }}>{errors.price.message}</p>}
         </div>
 
         <div>
-          <label>Image URL:</label>
-          <input
-            {...register("imageURL", {
-              required: "Image URL is required",
-            })}
-            onBlur={() => {
-              const raw = watch("imageURL");
-              const previewURL = raw.startsWith("http")
-                ? raw
-                : `${backendURL}/images/${raw}`;
-              setImagePreview(previewURL);
-            }}
-
-          />
-          {errors.imageURL && (
-            <p style={{ color: "red" }}>{errors.imageURL.message}</p>
-          )}
+          <label>Select Image:</label>
+          <select {...register("imageID", { required: "Image is required" })} onChange={handleImageChange}>
+            <option value="">-- Choose an image --</option>
+            {images.map((img) => (
+              <option key={img.imageID} value={img.imageID}>
+                {img.imageURL.split("/").pop()}
+              </option>
+            ))}
+          </select>
+          {errors.imageID && <p style={{ color: "red" }}>{errors.imageID.message}</p>}
           {imagePreview && <PreviewImage src={imagePreview} alt="Preview" />}
         </div>
 
         <button type="submit">Add Product</button>
-
         {apiError && <p style={{ color: "red" }}>{apiError}</p>}
       </form>
     </FormContainer>
