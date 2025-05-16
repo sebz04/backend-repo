@@ -35,7 +35,7 @@ function AddProductForm({ onProductAdded }) {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await axios.get(`${backendURL}/images?api_key=66529166-2cfe-473a-a538-b18bccf32cb7`);
+        const response = await axios.get(`${backendURL}/api/products/images?api_key=66529166-2cfe-473a-a538-b18bccf32cb7`);
         setImages(response.data);
       } catch (err) {
         console.error("Failed to fetch images", err.message);
