@@ -87,3 +87,20 @@ exports.deleteProduct = async (req, res) => {
     res.status(500).json({ error: "Failed to delete product", details: err.message });
   }
 };
+
+// 🔹 GET image list from ImageMaster
+exports.getImageList = async (req, res) => {
+  const apiKey = req.query.api_key;
+  const validKey = "66529166-2cfe-473a-a538-b18bccf32cb7";
+
+  if (apiKey !== validKey) {
+    return res.status(401).json({ error: "Invalid API key" });
+  }
+
+  try {
+    const [rows] = await db.query("SELECT imageID, imageURL FROM ImageMaster");
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch images", details: err.message });
+  }
+};
